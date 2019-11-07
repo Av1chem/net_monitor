@@ -6,9 +6,6 @@ from random import randint
 from selenium import webdriver
 from browsermobproxy import Server
 
-logging.basicConfig(level=logging.INFO)
-
-
 def parse_proxy_log(url):
     global proxy, logs
     target_request_found = False
@@ -35,6 +32,8 @@ def parse_proxy_log(url):
 
 if __name__ == '__main__':
 
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger()
     # parse arguments
     parser = argparse.ArgumentParser(add_help=True, description='Net monitor tool')
     parser.add_argument('-i', '--input', action='store', dest='inp', help='input filename')
@@ -46,7 +45,7 @@ if __name__ == '__main__':
                         type=int, default=10)
     args = parser.parse_args()
     if args.inp is None or args.out is None:
-        logging.error('''Input or output filename doesn't provided.''')
+        logging.info('''Input or output filename doesn't provided.''')
         exit(-1)
 
     # starting proxy server
@@ -62,13 +61,13 @@ if __name__ == '__main__':
     logging.info('starting selenium')
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument('--no-sandbox')
+    chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
     if not bool(args.vis):
         chrome_options.add_argument('--headless')
     chrome_options.add_argument('--proxy-server=%s' % proxy.proxy)
     driver = webdriver.Chrome(options=chrome_options)
     driver.set_page_load_timeout(60)
     logging.info('selenium started')
-
     prefix = 't{}_'.format(randint(0, 10000000))
     logs = []
 
